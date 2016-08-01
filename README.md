@@ -2,6 +2,11 @@
 
 Vanilla AngularJS Color Picker Directive with no requirement on jQuery
 
+## Changes in this fork
+
+This fork changes the behavior for popup mode (inline: false) so that it is more fluent - the color is changing on hover (as well as onChange event is generated) and on click into color the popup is closed. The close() event has additional parameter (bool) telling if the color has been chosen, i.e. user clicked within color. If the value is not true, it means the picker has been closed by click to somewhere else.
+The inline mode does not work with this fork for now (maybe will be fixed later with the original functionality). 
+
 ## Installation
 
 #### Bower

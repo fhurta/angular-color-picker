@@ -4,7 +4,7 @@
  *
  * Copyright 2016 ruhley
  *
- * 2016-07-29 09:30:27
+ * 2016-08-01 09:38:54
  *
  */
 
@@ -152,6 +152,7 @@
                   if (_this3.visible) {
                       return true;
                   }
+                  _this3.enableMouseEvents(true);
 
                   _this3.visible = true;
                   _this3.hueMouse = false;
@@ -167,13 +168,14 @@
                   _this3.eventApiDispatch('onOpen', [event]);
               };
 
-              this.api.close = function (event) {
+              this.api.close = function (event, bSelected) {
                   if (!_this3.options.inline && (_this3.visible || _this3.$element[0].querySelector('.color-picker-panel').offsetParent !== null)) {
 
+                      _this3.enableMouseEvents(false);
                       _this3.visible = false;
                       _this3.$scope.$applyAsync();
 
-                      _this3.eventApiDispatch('onClose', [event]);
+                      _this3.eventApiDispatch('onClose', [event, bSelected]);
                   }
               };
 
@@ -276,15 +278,9 @@
               // set default config settings
               this.initConfig();
 
-              // setup mouse events
-              this.$document.on('mousedown', this.onMouseDown.bind(this));
-              this.$document.on('mouseup', this.onMouseUp.bind(this));
-              this.$document.on('mousemove', this.onMouseMove.bind(this));
-
-              // setup touch events
-              this.$document.on('touchstart', this.onMouseDown.bind(this));
-              this.$document.on('touchend', this.onMouseUp.bind(this));
-              this.$document.on('touchmove', this.onMouseMove.bind(this));
+              if (this.options.inline) {
+                  this.enableMouseEvents(true);
+              }
 
               // grid click
               this.find('.color-picker-grid').on('click', this.onColorClick.bind(this));
@@ -297,6 +293,39 @@
               // opacity click
               this.find('.color-picker-opacity').on('click', this.onOpacityClick.bind(this));
               this.find('.color-picker-opacity').on('touchend', this.onOpacityClick.bind(this));
+          }
+      }, {
+          key: 'enableMouseEvents',
+          value: function enableMouseEvents(bEnable) {
+              if (!this.onMouseDownCallback) {
+                  this.onMouseDownCallback = this.onMouseDown.bind(this);
+              }
+              if (!this.onMouseUpCallback) {
+                  this.onMouseUpCallback = this.onMouseUp.bind(this);
+              }
+              if (!this.onMouseMoveCallback) {
+                  this.onMouseMoveCallback = this.onMouseMove.bind(this);
+              }
+
+              if (bEnable) {
+                  // setup mouse events
+                  this.$document.on('mousedown', this.onMouseDownCallback);
+                  this.$document.on('mouseup', this.onMouseUpCallback);
+                  this.$document.on('mousemove', this.onMouseMoveCallback);
+
+                  // setup touch events
+                  this.$document.on('touchstart', this.onMouseDownCallback);
+                  this.$document.on('touchend', this.onMouseUpCallback);
+                  this.$document.on('touchmove', this.onMouseMoveCallback);
+              } else {
+                  this.$document.off('mousedown', this.onMouseDownCallback);
+                  this.$document.off('mouseup', this.onMouseUpCallback);
+                  this.$document.off('mousemove', this.onMouseMoveCallback);
+
+                  this.$document.off('touchstart', this.onMouseDownCallback);
+                  this.$document.off('touchend', this.onMouseUpCallback);
+                  this.$document.off('touchmove', this.onMouseMoveCallback);
+              }
           }
       }, {
           key: 'onMouseDown',
@@ -322,15 +351,13 @@
           key: 'onMouseUp',
           value: function onMouseUp(event) {
               // no current mouse events and not an element in the picker
-              if (!this.colorMouse && !this.hueMouse && !this.opacityMouse && this.find(event.target).length === 0) {
+              if (!this.hueMouse && !this.opacityMouse && !(event.target.classList.contains('color-picker-grid-inner') || event.target.classList.contains('color-picker-picker') || event.target.parentNode.classList.contains('color-picker-picker'))) {
+                  if (this.colorMouse) {
+                      this.colorUp(event);
+                  }
                   this.setupApi(); // TODO - there are some weird times when this is needed to call close. Need to figure out why.
-                  this.api.close(event);
+                  this.api.close(event, false);
                   this.$scope.$apply();
-                  // mouse event on color grid
-              } else if (this.colorMouse) {
-                  this.colorUp(event);
-                  this.$scope.$apply();
-                  this.onChange(event);
                   // mouse event on hue slider
               } else if (this.hueMouse) {
                   this.hueUp(event);
@@ -346,9 +373,10 @@
       }, {
           key: 'onMouseMove',
           value: function onMouseMove(event) {
-              // mouse event on color grid
-              if (this.colorMouse) {
+              // mouse move event in color grid but not after click into (hue or opacity)
+              if (!this.hueMouse && !this.opacityMouse && this.find(event.target).length > 0 && (event.target.classList.contains('color-picker-grid-inner') || event.target.classList.contains('color-picker-picker') || event.target.parentNode.classList.contains('color-picker-picker'))) {
                   this.colorChange(event);
+                  this.onChange(event);
                   this.$scope.$apply();
                   // mouse event on hue slider
               } else if (this.hueMouse) {
@@ -367,6 +395,7 @@
                   this.colorChange(event);
                   this.$scope.$apply();
                   this.onChange(event);
+                  this.api.close(event, true);
               }
           }
       }, {
