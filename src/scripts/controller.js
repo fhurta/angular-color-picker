@@ -305,7 +305,10 @@ export default class AngularColorPickerController {
 
     onMouseUp (event) {
         // no current mouse events and not an element in the picker
-        if (!this.hueMouse && !this.opacityMouse && !(event.target.classList.contains('color-picker-grid-inner') || event.target.classList.contains('color-picker-picker') || event.target.parentNode.classList.contains('color-picker-picker'))) {
+        if (!this.hueMouse && !this.opacityMouse && 
+            !(event.target.classList.contains('color-picker-grid-inner') ||
+                event.target.classList.contains('color-picker-picker')||
+                (event.target.parentNode.classList && event.target.parentNode.classList.contains('color-picker-picker')))) {
             if (this.colorMouse) {
                 this.colorUp(event);
             }
@@ -328,6 +331,7 @@ export default class AngularColorPickerController {
     onMouseMove (event) {
         // mouse move event in color grid but not after click into (hue or opacity)
         if (!this.hueMouse && !this.opacityMouse && this.find(event.target).length > 0 && (event.target.classList.contains('color-picker-grid-inner') || event.target.classList.contains('color-picker-picker') || event.target.parentNode.classList.contains('color-picker-picker'))) {
+            this.colorMouse = true;
             this.colorChange(event);
             this.onChange(event);
             this.$scope.$apply();
@@ -339,6 +343,9 @@ export default class AngularColorPickerController {
         } else if (this.opacityMouse) {
             this.opacityChange(event);
             this.$scope.$apply();
+        }
+        else {
+            this.colorMouse = false;
         }
     }
 
@@ -379,15 +386,6 @@ export default class AngularColorPickerController {
 
             this.eventApiDispatch('onChange', [event]);
         }
-    }
-
-    onBlur (event) {
-        if (this.ngModel !== this.onChangeValue) {
-            this.updateModel = true;
-            this.update();
-        }
-
-        this.eventApiDispatch('onBlur', [event]);
     }
 
     initConfig () {
@@ -452,10 +450,6 @@ export default class AngularColorPickerController {
         }
 
         return newObject;
-    }
-
-    focus () {
-        this.find('.color-picker-input')[0].focus();
     }
 
     update () {
