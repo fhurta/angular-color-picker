@@ -1,10 +1,13 @@
+import tinycolor from 'tinycolor2';
+
 export default class AngularColorPickerController {
-    constructor(_$scope, _$element, _$document, _$timeout) {
+    constructor(_$scope, _$element, _$document, _$timeout, _ColorPickerOptions) {
         // set angular injected variables
         this.$scope = _$scope;
         this.$element = _$element;
         this.$document = _$document;
         this.$timeout = _$timeout;
+        this.ColorPickerOptions = _ColorPickerOptions;
 
         this.$scope.init = this.init.bind(this);
 
@@ -389,36 +392,11 @@ export default class AngularColorPickerController {
     }
 
     initConfig () {
-        this.options = this.merge(this.options, {
-            disabled: false,
-            hue: true,
-            alpha: true,
-            round: false,
-            case: 'upper',
-            format: 'hsl',
-            pos: 'bottom left',
-            swatch: true,
-            swatchOnly: false,
-            swatchPos: 'left',
-            swatchBootstrap: true,
-            inline: false,
-            placeholder: '',
-            close: {
-                show: false,
-                label: 'Close',
-                class: '',
-            },
-            clear: {
-                show: false,
-                label: 'Clear',
-                class: '',
-            },
-            reset: {
-                show: false,
-                label: 'Reset',
-                class: '',
-            },
-        });
+        if (!this.options) {
+            this.options = {};
+        }
+
+        this.mergeOptions(this.options, this.ColorPickerOptions);
 
         this.visible = this.options.inline;
 
@@ -427,29 +405,16 @@ export default class AngularColorPickerController {
         }
     }
 
-    merge(options, defaultOptions) {
-        var newObject = {};
-        var attr;
-
-        for (attr in defaultOptions) {
+    mergeOptions(options, defaultOptions) {
+        for (var attr in defaultOptions) {
             if (defaultOptions.hasOwnProperty(attr)) {
-                newObject[attr] = defaultOptions[attr];
-            }
-        }
-
-        if (typeof options === 'object') {
-            for (attr in options) {
-                if (options.hasOwnProperty(attr)) {
-                    if (typeof options[attr] === 'object') {
-                        newObject[attr] = this.merge(options[attr], newObject[attr]);
-                    } else {
-                        newObject[attr] = options[attr];
-                    }
+                if (!options || !options.hasOwnProperty(attr)) {
+                    options[attr] = defaultOptions[attr];
+                } else if (typeof defaultOptions[attr] === 'object') {
+                    this.mergeOptions(options[attr], defaultOptions[attr]);
                 }
             }
         }
-
-        return newObject;
     }
 
     update () {
@@ -874,4 +839,4 @@ export default class AngularColorPickerController {
     }
 }
 
-AngularColorPickerController.$inject = ['$scope', '$element', '$document', '$timeout'];
+AngularColorPickerController.$inject = ['$scope', '$element', '$document', '$timeout', 'ColorPickerOptions'];

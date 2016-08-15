@@ -1,5 +1,49 @@
 # Changelog
 
+## v2.4.3
+
+#### Breaking Changes
+  * None
+
+#### New Features
+  * None
+
+#### Bug Fixes
+  *   Bug #103 error creating options if none provided
+
+## v2.4.2
+
+#### Breaking Changes
+  * None
+
+#### New Features
+  * None
+
+#### Bug Fixes
+  *  Bug #102 non assign error if options was set in html
+
+## v2.4.1
+
+#### Breaking Changes
+  * None
+
+#### New Features
+  * New `required` option
+
+#### Bug Fixes
+  * None
+
+## v2.4.0
+
+#### Breaking Changes
+  * None
+
+#### New Features
+  * New `ColorPickerOptions` decorator
+
+#### Bug Fixes
+  * Add import for `tinycolor` for webpack
+
 ## v2.3.0
 
 #### Breaking Changes

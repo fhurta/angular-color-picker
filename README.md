@@ -76,6 +76,7 @@ $scope.color = '#FF0000';
 
 // options - if a list is given then choose one of the items. The first item in the list will be the default
 $scope.options = {
+    required: [false, true],
     disabled: [false, true],
     round: [false, true],
     format: ['hsl', 'hsv', 'rgb', 'hex', 'hex8'],
@@ -123,6 +124,19 @@ $scope.eventApi = {
     onReset: function(api, color, $event) {},
     onDestroy: function(api, color) {},
 };
+
+// decorator - all variables in options can be globally overridden here
+angular
+    .module('app', ['color.picker'])
+    .config(function($provide) {
+        $provide.decorator('ColorPickerOptions', function($delegate) {
+            var options = angular.copy($delegate);
+            options.round = true;
+            options.alpha = false;
+            options.format = 'hex';
+            return options;
+        });
+    });
 ```
 
 ## Requirements
